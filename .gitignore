@@ -14,7 +14,9 @@ out/
 *.iml
 .idea/
 .vscode/
-C:\Users\Thiago\ESTUDOS_PROGRAMACAO\MediShiftNeo\PLANEJAMENTO\
-C:\Users\Thiago\ESTUDOS_PROGRAMACAO\MediShiftNeo\00_GERAR_CONTEXTO.bat
-C:\Users\Thiago\ESTUDOS_PROGRAMACAO\MediShiftNeo\PLANEJAMENTO\Projeto_Contexto_Completo.txt
- 
+
+# Ignorar arquivos e pastas específicos
+PLANEJAMENTO/
+00_GERAR_CONTEXTO.bat
+PLANEJAMENTO/Projeto_Contexto_Completo.txt
+"Plano Completo do Projeto MediShift.txt"

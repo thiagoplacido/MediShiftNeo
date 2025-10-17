@@ -1,0 +1,20 @@
+# Ignorar cache do Gradle
+.gradle/
+
+# Ignorar arquivos de build
+build/
+out/
+
+# Ignorar arquivos temporários
+*.log
+*.tmp
+*.bak
+
+# Ignorar configurações locais
+*.iml
+.idea/
+.vscode/
+C:\Users\Thiago\ESTUDOS_PROGRAMACAO\MediShiftNeo\PLANEJAMENTO\
+C:\Users\Thiago\ESTUDOS_PROGRAMACAO\MediShiftNeo\00_GERAR_CONTEXTO.bat
+C:\Users\Thiago\ESTUDOS_PROGRAMACAO\MediShiftNeo\PLANEJAMENTO\Projeto_Contexto_Completo.txt
+ 

@@ -1,0 +1,288 @@
+Plano Completo do Projeto: MediShiftNeo (Do Zero)
+1. Visão Geral: Desenvolver uma aplicação web completa para gerenciamento de plantões, focada em segurança, auditoria e usabilidade, atendendo às necessidades específicas de controle de acesso por função e registro detalhado de atividades.
+
+2. Tecnologias Propostas:
+
+Backend: Node.js + Express
+
+Frontend: React + Vite
+
+Banco de Dados: SQLite (inicialmente), com possibilidade de migração futura (ex: PostgreSQL).
+
+Bibliotecas Chave: Axios (comunicação), Bcryptjs (senhas), Jsonwebtoken (login), React-IMask (máscaras), (Futuras: Geração de PDF, Upload de arquivos).
+
+3. Fases do Desenvolvimento:
+
+Fase 1: Configuração e Planejamento Inicial
+
+[ ] Definição detalhada do escopo e funcionalidades (baseado no documento original e anotações).
+
+[ ] Escolha final das tecnologias e bibliotecas.
+
+[ ] Instalação das ferramentas de desenvolvimento (Node.js, VS Code, Git).
+
+[ ] Criação da estrutura de pastas do projeto (ex: backend/, frontend/).
+
+[ ] Configuração inicial do controle de versão (Git).
+
+Fase 2: Backend - Estrutura e Banco de Dados
+
+[ ] Inicializar projeto Node.js no backend (npm init).
+
+[ ] Instalar dependências básicas (Express, SQLite3).
+
+[ ] Criar servidor Express básico (server.js).
+
+[ ] Criar script de configuração do banco de dados (database.js).
+
+[ ] Definir e criar todas as tabelas no banco de dados:
+
+Colaborador (com nome, email, telefone UNIQUE, senha HASHED, funcao ['Admin', 'Coordenador', 'Operador'], status, foto, timestamps).
+
+Unidade (com id, nome UNIQUE).
+
+Shift (Plantão) (com id, unidadeId FK, dataPlantao, turno, status ['ABERTO', 'REVISAO', 'FECHADO'], participantes TEXT/JSON, coResponsaveis TEXT/JSON, notasAdmin, referenciaId FK, timestamps).
+
+Residente (com id, nome, identificacao UNIQUE, dataNasc, contatos TEXT/JSON, tags TEXT/JSON, ativo, timestamps).
+
+Auditoria (com id, timestamp, autorId FK, acao, entidade, entidadeId, diffs TEXT/JSON, motivo, origem, versaoApp).
+
+(Futuro) AssinaturaPlantao (se necessário para múltiplas assinaturas).
+
+[ ] Criar script para popular o banco com o primeiro "Admin Master" (seed_admin.js), usando Telefone/Senha padrão.
+
+Fase 3: Backend - API de Autenticação e Segurança
+
+[ ] Instalar bcryptjs e jsonwebtoken.
+
+[ ] Criar rota pública POST /api/login (Telefone + Senha):
+
+Buscar colaborador pelo telefone.
+
+Comparar hash da senha (bcrypt.compare).
+
+Gerar Token JWT (jwt.sign) contendo id, nome, funcao.
+
+Retornar token e dados do colaborador.
+
+[ ] Criar middleware de autenticação (authMiddleware.js):
+
+Verificar a presença e validade do Token JWT no cabeçalho Authorization.
+
+Anexar dados do colaborador (req.colaborador) à requisição se o token for válido.
+
+Bloquear acesso (401 ou 403) se o token for inválido ou ausente.
+
+[ ] Aplicar o authMiddleware a todas as rotas da API, exceto /api e /api/login.
+
+Fase 4: Backend - API CRUD (Colaborador e Unidade)
+
+[ ] Criar módulo/arquivo auxiliar para Logs de Auditoria (auditLogger.js) com função registrarLog.
+
+[ ] Implementar rotas CRUD completas para /api/colaboradores:
+
+GET /: Listar todos (retornar funcao, status, etc.).
+
+POST /: Criar novo (receber funcao, hashear senha, registrar auditoria com autorId).
+
+PUT /:id: Editar dados (receber funcao, registrar auditoria com diffs).
+
+PUT /:id/status: Alterar status (ativo/inativo) (registrar auditoria com diffs).
+
+DELETE /:id: Excluir colaborador (verificar se req.colaborador.funcao === 'Admin', registrar auditoria).
+
+[ ] Implementar rotas CRUD para /api/unidades:
+
+GET /: Listar todas.
+
+POST /: Criar nova (verificar se req.colaborador.funcao é Admin/Coordenador, registrar auditoria).
+
+DELETE /:id: Excluir unidade (verificar permissão, verificar se não está em uso, registrar auditoria).
+
+Fase 5: Backend - API CRUD (Plantão e Residente)
+
+[ ] Implementar rotas CRUD para /api/shifts:
+
+GET /: Listar plantões (fazer JOIN com Unidade para obter nome).
+
+POST /: Criar novo (receber unidadeId, dataPlantao, turno, registrar auditoria).
+
+(Futuro) GET /:id: Buscar detalhes de um plantão.
+
+(Futuro) PUT /:id: Editar plantão (dados básicos, status, participantes, etc., registrar auditoria).
+
+(Futuro) POST /:id/assinar: Adicionar assinatura (registrar auditoria).
+
+[ ] Implementar rotas CRUD para /api/residentes:
+
+GET /: Listar residentes (ativos?).
+
+POST /: Criar novo (registrar auditoria).
+
+(Futuro) GET /:id: Buscar detalhes de um residente.
+
+(Futuro) PUT /:id: Editar residente (registrar auditoria).
+
+(Futuro) PUT /:id/status: Ativar/Desativar residente (registrar auditoria).
+
+Fase 6: Backend - API de Auditoria e Configurações
+
+[ ] Implementar rota GET /api/auditoria: Listar logs (ordenados por mais recente).
+
+[ ] (Futuro) Criar APIs para gerenciar opções de Turno e nome "Referência do Plantão".
+
+Fase 7: Frontend - Estrutura e Autenticação
+
+[ ] Inicializar projeto React no frontend (npm create vite).
+
+[ ] Instalar dependências (Axios, React-IMask).
+
+[ ] Estruturar App.jsx com lógica condicional (Mostrar TelaDeLogin ou PainelDeControle baseado no token).
+
+[ ] Implementar TelaDeLogin:
+
+Formulário com Telefone (usar react-imask) e Senha.
+
+Chamar POST /api/login ao submeter.
+
+Em caso de sucesso, chamar onLoginSuccess passando token e dados do colaborador.
+
+Salvar token e dados do colaborador no localStorage.
+
+Mostrar mensagens de erro.
+
+[ ] Implementar lógica no App.jsx para carregar token/usuário do localStorage ao iniciar.
+
+[ ] Implementar função handleLogout (limpar state e localStorage).
+
+[ ] Criar instância Axios (apiAutenticada) que envia o token JWT automaticamente nos cabeçalhos Authorization.
+
+Fase 8: Frontend - Painel de Controle (Visualização e CRUD Básico)
+
+[ ] Criar componente PainelDeControle.
+
+[ ] Implementar useEffect para carregar dados iniciais (Colaboradores, Unidades, Plantões, Residentes, Auditoria) usando apiAutenticada via Promise.all.
+
+[ ] Implementar seção "Gerenciamento de Colaboradores":
+
+Formulário de criação (com máscara, select de Função condicional).
+
+Formulário de edição (condicional).
+
+Lista de colaboradores mostrando funcao, status.
+
+Botões Editar, Ativar/Desativar, Excluir (com condicionais de permissão).
+
+Chamar rotas da API correspondentes (POST, PUT, DELETE).
+
+Recarregar dados e logs após cada ação.
+
+[ ] Implementar seção "Gerenciamento de Unidades":
+
+Formulário de criação.
+
+Lista de unidades com botão Excluir.
+
+Chamar rotas da API (POST, DELETE).
+
+Recarregar dados e logs.
+
+Condicional: Mostrar seção apenas para Admin/Coordenador.
+
+[ ] Implementar seção "Gerenciamento de Plantões":
+
+Formulário de criação (com dropdown de Unidades populado pela API, Data, Turno).
+
+Lista de plantões mostrando dados básicos.
+
+Chamar rota POST /api/shifts.
+
+Recarregar dados e logs.
+
+Condicional: Mostrar formulário apenas para Admin/Coordenador (inicialmente).
+
+[ ] Implementar seção "Gerenciamento de Residentes":
+
+Formulário de criação.
+
+Lista de residentes.
+
+Chamar rota POST /api/residentes.
+
+Recarregar dados e logs.
+
+Condicional: Mostrar formulário apenas para Admin/Coordenador.
+
+[ ] Implementar seção "Log de Auditoria":
+
+Listar logs carregados.
+
+Formatar data/hora e diffs para melhor leitura.
+
+Condicional: Mostrar seção apenas para Admin/Coordenador.
+
+[ ] Adicionar botão de Logout.
+
+Fase 9: Frontend - Funcionalidades Avançadas de Plantão
+
+[ ] Modificar formulário/API para adicionar/remover participantes.
+
+[ ] Implementar lógica/UI para designar "Referência do Plantão".
+
+[ ] Criar visualização/edição detalhada do plantão (nova "página" ou modal).
+
+[ ] Implementar adição de registros ao plantão (texto, etc.).
+
+[ ] Implementar UI para mudança de status do plantão (Revisão, Fechado).
+
+[ ] Implementar UI para assinaturas.
+
+Fase 10: Frontend - Refinamentos e Recursos Adicionais
+
+[ ] Implementar upload/exibição de foto do Colaborador.
+
+[ ] Adicionar campos contatos/tags para Residente (UI e API).
+
+[ ] Implementar CRUD completo para Plantões e Residentes (Edição, Status).
+
+[ ] Criar página/seção de "Configurações" (gerenciar Turnos, etc.).
+
+[ ] Implementar exportação de PDF.
+
+[ ] Melhorar UI/UX geral (navegação, feedback, design).
+
+Fase 11: Testes Finais
+
+[ ] Testar todas as funcionalidades manuais como Admin, Coordenador e Operador.
+
+[ ] Verificar todas as regras de permissão (visuais e na API).
+
+[ ] Verificar todos os logs de auditoria.
+
+[ ] Testar em diferentes navegadores/tamanhos de tela (responsividade básica).
+
+[ ] (Opcional) Escrever testes automatizados.
+
+Fase 12: Deployment
+
+[ ] Escolher e configurar plataforma de hospedagem (Backend e Frontend).
+
+[ ] Configurar banco de dados de produção (SQLite ou migrar).
+
+[ ] Configurar variáveis de ambiente (JWT_SECRET, etc.).
+
+[ ] Realizar build de produção do frontend.
+
+[ ] Colocar a aplicação no ar.
+
+[ ] Configurar backups do banco de dados.
+
+7. Considerações Contínuas:
+
+Segurança: Revisões periódicas, atualização de dependências.
+
+Backup: Estratégia de backup regular do banco de dados.
+
+Manutenção: Monitoramento, correção de bugs, futuras melhorias.
+
+Este é o plano completo, Thiago! Ele cobre tudo que discutimos e estabelece um caminho claro para construir o MediShiftNeo do início ao fim.
